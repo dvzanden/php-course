@@ -15,18 +15,54 @@
     <main>
         <pre><?php
                 $handle = opendir(__DIR__ . '/images');
+                $images = [];
+                $allowedExtenstions = [
+                    'jpg',
+                    'jpeg',
+                    'png',
+                ];
 
                 while (($currentFile = readdir($handle)) !== false) {
 
-                    $imgFile = pathinfo($currentFile, PATHINFO_EXTENSION);
-                    if ($imgFile === 'jpg') $images[] = $currentFile;
-                    //if (str_contains($currentFile, 'jpg')) $images[] = $currentFile;
+                    $extention = pathinfo($currentFile, PATHINFO_EXTENSION);
+
+                    if (!in_array($extention, $allowedExtenstions)) continue;
+
+                    $title = '';
+                    $content = [];
+
+                    $fileName = pathinfo($currentFile, PATHINFO_FILENAME);
+                    $txtFile = __DIR__ . '/images/' . $fileName . '.txt';
+
+                    if (file_exists($txtFile)) {
+                        $txt = file_get_contents($txtFile);
+                        $info = explode("\n", $txt);
+                        $title = $info[0];
+                        unset($info[0]);
+                        $content = array_values($info);
+                    }
+
+
+                    $images[] = [
+                        'image' => $currentFile,
+                        'title' => $title,
+                        'content' => $content
+                    ];
                 };
-                var_dump($images);
+
+
+
+
                 ?></pre>
 
         <?php foreach ($images as $image) : ?>
-            <img src='images/<?= rawurldecode($image) ?>' />
+            <h1><?= $image['title'] ?></h1>
+            <img src='images/<?= rawurldecode($image['image']) ?>' />
+            <article>
+                <?php foreach ($image['content'] as $v) : ?>
+                    <p><?= $v ?></p>
+                <?php endforeach; ?>
+            </article>
         <?php endforeach; ?>
     </main>
 </body>
